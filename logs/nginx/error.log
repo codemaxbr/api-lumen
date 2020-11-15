@@ -1,0 +1,2 @@
+2020/11/13 16:01:09 [warn] 1#1: duplicate MIME type "text/html" in /etc/nginx/conf.d/000_site.conf:14
+2020/11/13 16:01:09 [warn] 1#1: conflicting server name "localhost" on 0.0.0.0:80, ignored

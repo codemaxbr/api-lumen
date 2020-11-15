@@ -1,0 +1,11 @@
+version: '2'
+services:
+
+  # PHP com todos as Extensões instaladas
+  api:
+    image: gerentepro/lumen:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/usr/share/nginx # <!--se for lumen
+      #- ./:/var/www # <!--se for swoole
