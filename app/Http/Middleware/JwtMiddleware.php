@@ -2,6 +2,7 @@
 namespace App\Http\Middleware;
 
 //use App\Models\Account;
+use Carbon\Carbon;
 use Closure;
 use Exception;
 use Firebase\JWT\JWT;
@@ -30,65 +31,37 @@ class JwtMiddleware
             ], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $credentials = JWT::decode($token, 'JhbGciOiJIU', ['HS256']);
+            $credentials = JWT::decode($token, 'zhsWhF6BVtmT3ePD', ['HS256']);
 
-            if($credentials->iss == "lumen-jwt")
+            if($credentials->iss == "admin")
             {
                 if(Cache::has($token)){
                     $user = Cache::get($token);
                 }else{
-                    $user = \App\Models\User::find($credentials->sub);
+                    $now = Carbon::now();
+                    $validade = Carbon::createFromTimestamp($credentials->exp);
+
+                    $user = Cache::remember($token, $now->diffInSeconds($validade), function() use ($credentials){
+                        return \App\Models\User::find($credentials->id);
+                    });
                 }
 
-                if ($user->id == $credentials->sub && $token != $user->remember_token){
-
-                    //TODO: executar evento que reporta tentativa de ataque
-
+                if($user->account->id == $credentials->acc)
+                {
+                    if(!Cache::has('account_'.$credentials->acc)){
+                        Cache::rememberForever('account_'.$credentials->acc, function () use ($user){
+                            return $user->account;
+                        });
+                    }
+                    return $next($request);
+                }else{
                     return response()->json([
                         'error' => 'Tentativa XSS Cross-Site Scripting detectado. [xss]'
                     ], Response::HTTP_UNAUTHORIZED);
                 }
-
-                $account_id = $user->account->id;
-
-                if(!Cache::has('account_'.$account_id)){
-                    Cache::rememberForever('account_'.$account_id, function () use ($user){
-                        return $user->account;
-                    });
-                }
-                return $next($request);
             }
 
-            elseif ($credentials->iss == "bridge") {
-                if(!Cache::has('bridge_'.$token))
-                {
-                    $user = \App\Models\User::find($credentials->sub);
-                    $api_token = \App\Models\ApiToken::query()->where(['user_id' => $user->id, 'token' => $token])->get();
-
-                    if($api_token->isNotEmpty())
-                    {
-                        $account_id = $user->account->id;
-
-                        if(!Cache::has('account_'.$account_id)){
-                            Cache::rememberForever('account_'.$account_id, function () use ($user){
-                                return $user->account;
-                            });
-                        }
-
-                        Cache::rememberForever('bridge_'.$token, function () use ($user){
-                            return $user;
-                        });
-                    }else{
-                        return response()->json([
-                            'error' => 'Token de acesso bridge inválido.'
-                        ], Response::HTTP_UNAUTHORIZED);
-                    }
-                }else{
-                    return $next($request);
-                }
-            }
             else{
-
                 return response()->json([
                     'error' => 'Acesso restrito apenas para Administradores'
                 ], Response::HTTP_FORBIDDEN);

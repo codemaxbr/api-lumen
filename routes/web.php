@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Cache;
+
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });

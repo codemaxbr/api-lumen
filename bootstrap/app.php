@@ -44,6 +44,7 @@ $app->configure('session');
 $app->configure('queue');
 $app->configure('swoole_http');
 $app->configure('swoole_websocket');
+$app->configure('repository');
 /*
  * ------------------------------------------------------------------------
  * Insert yours Providers in here
@@ -102,11 +103,12 @@ $app->singleton('filesystem', function ($app) {
 $app->middleware([
     // App\Http\Middleware\ExampleMiddleware::class
     Fruitcake\Cors\HandleCors::class,
+    App\Http\Middleware\JwtMiddleware::class
 ]);
 
 $app->routeMiddleware([
-    'auth'          => App\Http\Middleware\Authenticate::class,
-    //'jwt.auth'      => App\Http\Middleware\JwtMiddleware::class,
+    //'auth'          => App\Http\Middleware\Authenticate::class,
+    'jwt.auth'      => App\Http\Middleware\JwtMiddleware::class,
 ]);
 
 /*
