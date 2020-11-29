@@ -33,9 +33,9 @@ $app->instance('path.public', app()->basePath() . DIRECTORY_SEPARATOR . 'public'
  * ------------------------------------------------------------------------
  */
 
+$app->configure('cache');
 $app->configure('database');
 $app->configure('cors');
-$app->configure('cache');
 $app->configure('filesystems');
 $app->configure('broadcasting');
 $app->configure('models');
@@ -45,6 +45,7 @@ $app->configure('queue');
 $app->configure('swoole_http');
 $app->configure('swoole_websocket');
 $app->configure('repository');
+$app->configure('permission');
 /*
  * ------------------------------------------------------------------------
  * Insert yours Providers in here
